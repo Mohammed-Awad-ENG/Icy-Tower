@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Icy Tower Clone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="ui">
+            <div id="scoreDisplay">Score: 0</div>
+            <div id="comboDisplay" class="hidden">Combo! <span id="comboMultiplier">x1</span></div>
+            <div id="gameOver" class="hidden">
+                <h1>Game Over</h1>
+                <p>Score: <span id="finalScore">0</span></p>
+                <button id="restartBtn">Restart</button>
+            </div>
+        </div>
+    </div>
+    <div class="touch-controls">
+        <div class="touch-btn" id="btnLeft">◄</div>
+        <div class="touch-btn" id="btnJump">▲</div>
+        <div class="touch-btn" id="btnRight">►</div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
