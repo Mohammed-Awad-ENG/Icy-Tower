@@ -11,19 +11,58 @@ const btnLeft = document.getElementById('btnLeft');
 const btnRight = document.getElementById('btnRight');
 const btnJump = document.getElementById('btnJump');
 
+const startMenu = document.getElementById('startMenu');
+const startBtn = document.getElementById('startBtn');
+const musicToggleBtn = document.getElementById('musicToggleBtn');
+
+const menuMusic = new Audio('audio/main_menu.mp3');
+menuMusic.loop = true;
+const gameMusic = new Audio('audio/GameMusic.mp3');
+gameMusic.loop = true;
+let gameMusicEnabled = false;
+
+musicToggleBtn.addEventListener('click', () => {
+    gameMusicEnabled = !gameMusicEnabled;
+    if (gameMusicEnabled) {
+        musicToggleBtn.innerText = 'Music: ON';
+        musicToggleBtn.classList.add('on');
+        if (gameState === 'playing') gameMusic.play();
+    } else {
+        musicToggleBtn.innerText = 'Music: OFF';
+        musicToggleBtn.classList.remove('on');
+        gameMusic.pause();
+    }
+});
+
+function attemptPlayMenuMusic() {
+    if (gameState === 'start' && menuMusic.paused) {
+        menuMusic.play().catch(e => console.log('Autoplay blocked'));
+    }
+}
+document.addEventListener('click', attemptPlayMenuMusic, { once: true });
+document.addEventListener('keydown', attemptPlayMenuMusic, { once: true });
+
 let logicalHeight = 800;
-let scale = window.innerHeight / logicalHeight;
-let logicalWidth = window.innerWidth / scale;
+let scale = 1;
+let logicalWidth = 800;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-window.addEventListener('resize', () => {
+function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    scale = window.innerHeight / logicalHeight;
+    
+    let targetLogicalHeight = 800;
+    scale = window.innerHeight / targetLogicalHeight;
     logicalWidth = window.innerWidth / scale;
-});
+    logicalHeight = targetLogicalHeight;
+
+    if (logicalWidth > 900) {
+        logicalWidth = 900;
+        scale = window.innerWidth / logicalWidth;
+        logicalHeight = window.innerHeight / scale;
+    }
+}
+window.addEventListener('resize', resize);
+resize();
 
 let keys = { ArrowLeft: false, ArrowRight: false, Space: false };
 
@@ -63,24 +102,34 @@ let lastFloorTouched = 0;
 let comboTimer = 0;
 
 function initGame() {
+    menuMusic.pause();
+    menuMusic.currentTime = 0;
+    if (gameMusicEnabled) {
+        gameMusic.play();
+    }
+
+    startMenu.classList.add('hidden');
+    scoreDisplay.classList.remove('hidden');
+    musicToggleBtn.classList.remove('hidden');
+
     player = {
-        x: logicalWidth / 2 - 20,
+        x: logicalWidth / 2 - 15,
         y: logicalHeight - 200,
-        width: 40,
+        width: 30,
         height: 40,
         dx: 0,
         dy: 0,
-        speed: 0.8,
-        maxSpeed: 10,
-        friction: 0.85,
-        gravity: 0.6,
-        jumpStrength: -16,
+        speed: 0.25,
+        maxSpeed: 8,
+        gravity: 0.4,
+        jumpStrength: -11.5,
         onGround: false,
         wasOnGround: false,
         wallJumpTimer: 0,
         facingRight: true,
         scaleX: 1,
-        scaleY: 1
+        scaleY: 1,
+        animTimer: 0
     };
 
     platforms = [];
@@ -109,9 +158,9 @@ function initGame() {
 
 function generatePlatforms() {
     while (lastPlatformY > cameraY - logicalHeight * 2.5) {
-        lastPlatformY -= Math.random() * 80 + 100;
-        let minWidth = Math.max(120, logicalWidth * 0.15);
-        let maxWidth = Math.min(300, logicalWidth * 0.35);
+        lastPlatformY -= Math.random() * 30 + 70;
+        let minWidth = Math.max(150, logicalWidth * 0.2);
+        let maxWidth = Math.min(320, logicalWidth * 0.4);
         let width = Math.random() * (maxWidth - minWidth) + minWidth;
         let x = Math.random() * (logicalWidth - width);
         floorCounter++;
@@ -137,20 +186,40 @@ function updateParticles() {
     particles = particles.filter(p => p.y < cameraY + logicalHeight + 40);
 }
 
+let bgPattern = null;
+function createBackgroundPattern() {
+    let patCanvas = document.createElement('canvas');
+    patCanvas.width = 120;
+    patCanvas.height = 120;
+    let pCtx = patCanvas.getContext('2d');
+    pCtx.fillStyle = '#111827';
+    pCtx.fillRect(0, 0, 120, 120);
+    pCtx.strokeStyle = '#1f2937';
+    pCtx.lineWidth = 3;
+    for(let y=0; y<120; y+=30) {
+        pCtx.beginPath(); pCtx.moveTo(0, y); pCtx.lineTo(120, y); pCtx.stroke();
+        let offset = (y % 60 === 0) ? 0 : 30;
+        for(let x=0; x<=120; x+=60) {
+            pCtx.beginPath(); pCtx.moveTo(x + offset, y); pCtx.lineTo(x + offset, y + 30); pCtx.stroke();
+        }
+    }
+    return patCanvas;
+}
+
 function drawBackground() {
-    let progress = Math.min(1, Math.abs(cameraY) / 40000);
-    let r1 = Math.floor(0 * (1 - progress) + 15 * progress);
-    let g1 = Math.floor(31 * (1 - progress) + 20 * progress);
-    let b1 = Math.floor(63 * (1 - progress) + 40 * progress);
-    
-    let r2 = Math.floor(0 * (1 - progress) + 0 * progress);
-    let g2 = Math.floor(116 * (1 - progress) + 40 * progress);
-    let b2 = Math.floor(217 * (1 - progress) + 80 * progress);
-    
+    if (!bgPattern) {
+        let patCanvas = createBackgroundPattern();
+        bgPattern = ctx.createPattern(patCanvas, 'repeat');
+    }
+    ctx.save();
+    let offsetY = -(cameraY * 0.5 % 120);
+    ctx.translate(0, offsetY);
+    ctx.fillStyle = bgPattern;
+    ctx.fillRect(0, -120, logicalWidth, logicalHeight + 240);
+    ctx.restore();
     let grad = ctx.createLinearGradient(0, 0, 0, logicalHeight);
-    grad.addColorStop(0, `rgb(${r1}, ${g1}, ${b1})`);
-    grad.addColorStop(1, `rgb(${r2}, ${g2}, ${b2})`);
-    
+    grad.addColorStop(0, 'rgba(10, 25, 50, 0.6)');
+    grad.addColorStop(1, 'rgba(25, 50, 90, 0.4)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 }
@@ -165,6 +234,7 @@ function drawParticles() {
 }
 
 function updatePlayer() {
+    let isMoving = keys.ArrowLeft || keys.ArrowRight;
     if (player.wallJumpTimer > 0) {
         player.wallJumpTimer--;
     } else {
@@ -177,7 +247,16 @@ function updatePlayer() {
         }
     }
 
-    player.dx *= player.friction;
+    if (player.onGround) {
+        if (isMoving) {
+            player.dx *= 0.97;
+        } else {
+            player.dx *= 0.92;
+        }
+    } else {
+        player.dx *= 0.99;
+    }
+
     if (player.dx > player.maxSpeed) player.dx = player.maxSpeed;
     if (player.dx < -player.maxSpeed) player.dx = -player.maxSpeed;
 
@@ -187,12 +266,10 @@ function updatePlayer() {
 
     if (player.x < 0) {
         player.x = 0;
-        if (Math.abs(player.dx) > 3) {
-            player.dx = Math.abs(player.dx) * 1.2;
-            player.dy = player.jumpStrength * 0.9;
-            player.wallJumpTimer = 12;
+        if (Math.abs(player.dx) > 3 && !player.onGround) {
+            player.dx = Math.abs(player.dx) * 0.9;
+            player.wallJumpTimer = 10;
             player.facingRight = true;
-            player.onGround = false;
             player.scaleX = 0.7;
             player.scaleY = 1.3;
         } else {
@@ -200,12 +277,10 @@ function updatePlayer() {
         }
     } else if (player.x + player.width > logicalWidth) {
         player.x = logicalWidth - player.width;
-        if (Math.abs(player.dx) > 3) {
-            player.dx = -Math.abs(player.dx) * 1.2;
-            player.dy = player.jumpStrength * 0.9;
-            player.wallJumpTimer = 12;
+        if (Math.abs(player.dx) > 3 && !player.onGround) {
+            player.dx = -Math.abs(player.dx) * 0.9;
+            player.wallJumpTimer = 10;
             player.facingRight = false;
-            player.onGround = false;
             player.scaleX = 0.7;
             player.scaleY = 1.3;
         } else {
@@ -214,7 +289,7 @@ function updatePlayer() {
     }
 
     if (keys.Space && player.onGround) {
-        let jumpBoost = Math.abs(player.dx) * 0.35;
+        let jumpBoost = Math.abs(player.dx) * 0.75;
         player.dy = player.jumpStrength - jumpBoost;
         player.onGround = false;
         player.scaleX = 0.8;
@@ -289,13 +364,13 @@ function updatePlayer() {
     }
     scoreDisplay.innerText = `Score: ${score}`;
 
-    if (player.y < cameraY + logicalHeight * 0.4) {
-        cameraY = player.y - logicalHeight * 0.4;
+    if (player.y < cameraY + logicalHeight * 0.35) {
+        cameraY = player.y - logicalHeight * 0.35;
     }
 
-    let targetSpeed = 1.0 + (score * 0.006);
+    let targetSpeed = 1.0 + (score * 0.0015);
     if (gameSpeed < targetSpeed) {
-        gameSpeed += 0.002;
+        gameSpeed += 0.001;
     }
     
     cameraY -= gameSpeed;
@@ -305,27 +380,48 @@ function updatePlayer() {
     }
 }
 
+let playerSprite = new Image();
+playerSprite.src = 'player.png';
+let spriteFrameW = 0;
+let spriteFrameH = 0;
+playerSprite.onload = function() {
+    spriteFrameW = playerSprite.naturalWidth / 5;
+    spriteFrameH = playerSprite.naturalHeight;
+};
+
 function drawPlayer() {
+    if (!spriteFrameW) return;
     ctx.save();
     let cx = player.x + player.width / 2;
     let cy = player.y - cameraY + player.height;
     
     ctx.translate(cx, cy);
-    ctx.scale(player.scaleX, player.scaleY);
+    if (!player.facingRight) {
+        ctx.scale(-1, 1);
+    }
     
-    ctx.fillStyle = '#ff4757';
-    ctx.fillRect(-player.width / 2, -player.height, player.width, player.height);
+    let speedAbs = Math.abs(player.dx);
+    player.animTimer = (player.animTimer || 0) + speedAbs * 0.15;
+    if (!player.onGround) {
+        player.animTimer = 0;
+    }
     
-    ctx.fillStyle = '#ffffff';
-    let eyeOffsetX = player.facingRight ? 4 : -18;
-    ctx.fillRect(eyeOffsetX, -player.height + 10, 14, 10);
+    let frameIndex = 0;
+    if (!player.onGround) {
+        if (player.dy < 0) {
+            frameIndex = 3;
+        } else {
+            frameIndex = 4;
+        }
+    } else if (speedAbs > 0.5) {
+        frameIndex = 1 + (Math.floor(player.animTimer) % 2);
+    }
     
-    ctx.fillStyle = '#2f3542';
-    let pupilOffsetX = player.facingRight ? 10 : -16;
-    ctx.fillRect(pupilOffsetX, -player.height + 12, 6, 6);
-
-    ctx.fillStyle = '#3742fa';
-    ctx.fillRect(-player.width / 2 - 3, -player.height - 5, player.width + 6, 10);
+    let drawH = player.height * 2.5;
+    let drawW = drawH * (spriteFrameW / spriteFrameH);
+    let scaledW = drawW * player.scaleX;
+    let scaledH = drawH * player.scaleY;
+    ctx.drawImage(playerSprite, frameIndex * spriteFrameW, 0, spriteFrameW, spriteFrameH, -scaledW / 2, -scaledH, scaledW, scaledH);
     
     ctx.restore();
 }
@@ -396,4 +492,11 @@ function gameLoop() {
 }
 
 restartBtn.addEventListener('click', initGame);
-initGame();
+startBtn.addEventListener('click', initGame);
+
+gameState = 'start';
+ctx.save();
+ctx.scale(scale, scale);
+drawBackground();
+ctx.restore();
+attemptPlayMenuMusic();

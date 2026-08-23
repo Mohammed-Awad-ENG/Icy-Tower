@@ -11,8 +11,16 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div id="ui">
-            <div id="scoreDisplay">Score: 0</div>
+            <div id="scoreDisplay" class="hidden">Score: 0</div>
             <div id="comboDisplay" class="hidden">Combo! <span id="comboMultiplier">x1</span></div>
+            
+            <button id="musicToggleBtn" class="hidden">Music: OFF</button>
+            
+            <div id="startMenu">
+                <h1>Icy Tower Clone</h1>
+                <button id="startBtn">Start Game</button>
+            </div>
+            
             <div id="gameOver" class="hidden">
                 <h1>Game Over</h1>
                 <p>Score: <span id="finalScore">0</span></p>

@@ -151,3 +151,67 @@ canvas {
 @media (max-width: 800px), (max-height: 800px) {
     .touch-controls { display: flex; }
 }
+
+#startMenu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 50px;
+    border-radius: 15px;
+    text-align: center;
+    pointer-events: auto;
+    border: 2px solid #7fdbff;
+    box-shadow: 0 0 30px rgba(127, 219, 255, 0.4);
+    backdrop-filter: blur(5px);
+}
+
+#startMenu h1 {
+    margin-top: 0;
+    color: #7fdbff;
+    text-shadow: 2px 2px 0 #000;
+    font-size: clamp(28px, 8vw, 42px);
+}
+
+#startBtn {
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: clamp(18px, 5vw, 24px);
+    background: linear-gradient(180deg, #ff851b, #ff4136);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    transition: transform 0.1s;
+}
+
+#startBtn:active {
+    transform: scale(0.95);
+}
+
+#musicToggleBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 8px 16px;
+    font-size: clamp(14px, 3vw, 16px);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    pointer-events: auto;
+    transition: background 0.2s, color 0.2s;
+}
+
+#musicToggleBtn.on {
+    background: white;
+    color: black;
+}
