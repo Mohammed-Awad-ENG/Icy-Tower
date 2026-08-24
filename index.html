@@ -4,27 +4,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Icy Tower Clone</title>
+<meta name="description" content="A fast-paced vertical platformer inspired by Icy Tower. Jump, combo, and climb your way to the top!">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="game-wrapper">
     <div class="game-container">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="screenFlash"></div>
         <div id="ui">
             <div id="scoreDisplay" class="hidden">Score: 0</div>
-            <div id="comboDisplay" class="hidden">Combo! <span id="comboMultiplier">x1</span></div>
+            <div id="floorDisplay" class="hidden">Floor: 0</div>
+            <div id="comboDisplay" class="hidden">COMBO <span id="comboMultiplier">x1</span></div>
             
             <button id="musicToggleBtn" class="hidden">Music: OFF</button>
             
             <div id="startMenu">
-                <h1>Icy Tower Clone</h1>
-                <button id="startBtn">Start Game</button>
+                <h1>ICY TOWER</h1>
+                <button id="startBtn">PLAY</button>
             </div>
             
             <div id="gameOver" class="hidden">
-                <h1>Game Over</h1>
-                <p>Score: <span id="finalScore">0</span></p>
-                <button id="restartBtn">Restart</button>
+                <h1>GAME OVER</h1>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">SCORE</div>
+                        <div class="stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">FLOOR</div>
+                        <div class="stat-value" id="finalFloor">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">BEST COMBO</div>
+                        <div class="stat-value" id="finalCombo">0</div>
+                    </div>
+                </div>
+                <button id="restartBtn">RETRY</button>
             </div>
         </div>
     </div>

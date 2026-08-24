@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap');
+
 body {
     margin: 0;
     padding: 0;
@@ -7,7 +9,7 @@ body {
     align-items: center;
     height: 100vh;
     width: 100vw;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Orbitron', 'Courier New', Courier, monospace;
     overflow: hidden;
     touch-action: none;
 }
@@ -43,46 +45,190 @@ canvas {
     pointer-events: none;
 }
 
+
 #scoreDisplay {
     position: absolute;
     top: 15px;
     left: 15px;
     color: #fff;
-    font-size: clamp(16px, 4vw, 24px);
-    font-weight: bold;
-    text-shadow: 2px 2px 0 #000;
+    font-size: clamp(18px, 4vw, 28px);
+    font-weight: 900;
+    text-shadow:
+        0 0 10px rgba(127, 219, 255, 0.8),
+        2px 2px 0 #000;
+    letter-spacing: 2px;
+    font-family: 'Orbitron', monospace;
 }
+
+
+#floorDisplay {
+    position: absolute;
+    top: 50px;
+    left: 15px;
+    color: #a0e8ff;
+    font-size: clamp(13px, 3vw, 18px);
+    font-weight: 700;
+    text-shadow:
+        0 0 8px rgba(127, 219, 255, 0.6),
+        1px 1px 0 #000;
+    letter-spacing: 1px;
+    font-family: 'Orbitron', monospace;
+}
+
 
 #comboDisplay {
     position: absolute;
-    top: 55px;
+    top: 85px;
     left: 15px;
     color: #ffdc00;
-    font-size: clamp(14px, 3.5vw, 20px);
-    font-weight: bold;
-    text-shadow: 2px 2px 0 #000;
-    animation: pulse 0.5s infinite alternate;
+    font-size: clamp(16px, 4vw, 26px);
+    font-weight: 900;
+    text-shadow:
+        0 0 15px rgba(255, 220, 0, 0.9),
+        0 0 30px rgba(255, 140, 0, 0.6),
+        2px 2px 0 #000;
+    animation: comboPulse 0.3s infinite alternate;
+    font-family: 'Press Start 2P', monospace;
+    transition: transform 0.15s ease-out;
 }
 
-@keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.1); }
+#comboDisplay.mega {
+    color: #ff4444;
+    text-shadow:
+        0 0 20px rgba(255, 50, 50, 1),
+        0 0 40px rgba(255, 0, 0, 0.8),
+        0 0 60px rgba(255, 100, 0, 0.5),
+        2px 2px 0 #000;
+    animation: megaComboPulse 0.15s infinite alternate;
 }
+
+#comboDisplay.ultra {
+    color: #ff00ff;
+    text-shadow:
+        0 0 25px rgba(255, 0, 255, 1),
+        0 0 50px rgba(200, 0, 255, 0.8),
+        0 0 80px rgba(100, 0, 255, 0.5),
+        2px 2px 0 #000;
+    animation: ultraComboPulse 0.1s infinite alternate;
+}
+
+@keyframes comboPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+}
+
+@keyframes megaComboPulse {
+    from { transform: scale(1) rotate(-1deg); }
+    to { transform: scale(1.15) rotate(1deg); }
+}
+
+@keyframes ultraComboPulse {
+    from { transform: scale(1) rotate(-2deg); }
+    to { transform: scale(1.2) rotate(2deg); }
+}
+
+
+#screenFlash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.08s ease-out;
+    z-index: 10;
+}
+
+#screenFlash.flash {
+    opacity: 1;
+}
+
+
+.combo-popup {
+    position: absolute;
+    color: #ffdc00;
+    font-size: clamp(20px, 5vw, 36px);
+    font-weight: 900;
+    font-family: 'Press Start 2P', monospace;
+    text-shadow:
+        0 0 20px rgba(255, 220, 0, 0.9),
+        0 0 40px rgba(255, 140, 0, 0.6),
+        3px 3px 0 #000;
+    animation: comboPopup 1.2s ease-out forwards;
+    pointer-events: none;
+    z-index: 20;
+    white-space: nowrap;
+}
+
+.combo-popup.mega {
+    color: #ff4444;
+    font-size: clamp(28px, 7vw, 48px);
+    text-shadow:
+        0 0 25px rgba(255, 50, 50, 1),
+        0 0 50px rgba(255, 0, 0, 0.8),
+        3px 3px 0 #000;
+}
+
+.combo-popup.ultra {
+    color: #ff00ff;
+    font-size: clamp(34px, 9vw, 56px);
+    text-shadow:
+        0 0 30px rgba(255, 0, 255, 1),
+        0 0 60px rgba(200, 0, 255, 0.8),
+        3px 3px 0 #000;
+}
+
+@keyframes comboPopup {
+    0% {
+        transform: translate(-50%, 0) scale(0.5);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -10px) scale(1.4);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -20px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -120px) scale(0.6);
+        opacity: 0;
+    }
+}
+
 
 #gameOver {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(10, 0, 0, 0.92);
     color: white;
-    padding: 40px;
-    border-radius: 15px;
+    padding: 50px;
+    border-radius: 20px;
     text-align: center;
     pointer-events: auto;
-    border: 2px solid #7fdbff;
-    box-shadow: 0 0 30px rgba(127, 219, 255, 0.4);
-    backdrop-filter: blur(5px);
+    border: 2px solid #ff4136;
+    box-shadow:
+        0 0 40px rgba(255, 50, 50, 0.5),
+        0 0 80px rgba(255, 0, 0, 0.2),
+        inset 0 0 40px rgba(255, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    animation: gameOverAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    font-family: 'Orbitron', monospace;
+}
+
+@keyframes gameOverAppear {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
 }
 
 .hidden {
@@ -92,28 +238,75 @@ canvas {
 #gameOver h1 {
     margin-top: 0;
     color: #ff4136;
-    text-shadow: 2px 2px 0 #000;
-    font-size: clamp(24px, 6vw, 36px);
+    text-shadow:
+        0 0 20px rgba(255, 50, 50, 0.8),
+        2px 2px 0 #000;
+    font-size: clamp(28px, 7vw, 42px);
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 3px;
+}
+
+#gameOver p {
+    font-size: clamp(16px, 4vw, 22px);
+    color: #a0e8ff;
+    margin: 10px 0;
+}
+
+#gameOver .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 15px 0 5px;
+}
+
+#gameOver .stat-item {
+    text-align: center;
+}
+
+#gameOver .stat-label {
+    font-size: clamp(10px, 2.5vw, 13px);
+    color: #7fdbff;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+#gameOver .stat-value {
+    font-size: clamp(18px, 5vw, 28px);
+    color: #fff;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(127, 219, 255, 0.6);
 }
 
 #restartBtn {
-    margin-top: 20px;
-    padding: 12px 24px;
+    margin-top: 25px;
+    padding: 14px 28px;
     font-size: clamp(16px, 4vw, 20px);
-    background: linear-gradient(180deg, #2ecc40, #28b62c);
+    background: linear-gradient(180deg, #ff851b, #ff4136);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-    transition: transform 0.1s;
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    letter-spacing: 2px;
+    box-shadow:
+        0 4px 15px rgba(255, 65, 54, 0.5),
+        0 0 30px rgba(255, 133, 27, 0.3);
+    transition: transform 0.1s, box-shadow 0.2s;
+    text-transform: uppercase;
+}
+
+#restartBtn:hover {
+    box-shadow:
+        0 6px 20px rgba(255, 65, 54, 0.7),
+        0 0 40px rgba(255, 133, 27, 0.5);
+    transform: translateY(-2px);
 }
 
 #restartBtn:active {
-    transform: scale(0.95);
+    transform: scale(0.95) translateY(0);
 }
+
 
 .touch-controls {
     display: none;
@@ -130,9 +323,9 @@ canvas {
 
 .touch-btn {
     pointer-events: auto;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
     width: 70px;
     height: 70px;
     border-radius: 50%;
@@ -142,76 +335,115 @@ canvas {
     font-size: 28px;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(4px);
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .touch-btn:active {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(127, 219, 255, 0.25);
+    border-color: rgba(127, 219, 255, 0.6);
+    box-shadow: 0 0 20px rgba(127, 219, 255, 0.4);
 }
 
 @media (max-width: 800px), (max-height: 800px) {
     .touch-controls { display: flex; }
 }
 
+
 #startMenu {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 10, 30, 0.92);
     color: white;
-    padding: 50px;
-    border-radius: 15px;
+    padding: 50px 60px;
+    border-radius: 20px;
     text-align: center;
     pointer-events: auto;
     border: 2px solid #7fdbff;
-    box-shadow: 0 0 30px rgba(127, 219, 255, 0.4);
-    backdrop-filter: blur(5px);
+    box-shadow:
+        0 0 40px rgba(127, 219, 255, 0.4),
+        0 0 80px rgba(127, 219, 255, 0.15),
+        inset 0 0 30px rgba(127, 219, 255, 0.05);
+    backdrop-filter: blur(10px);
+    animation: menuFloat 3s ease-in-out infinite;
+}
+
+@keyframes menuFloat {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50% { transform: translate(-50%, -50%) translateY(-8px); }
 }
 
 #startMenu h1 {
     margin-top: 0;
     color: #7fdbff;
-    text-shadow: 2px 2px 0 #000;
-    font-size: clamp(28px, 8vw, 42px);
+    text-shadow:
+        0 0 20px rgba(127, 219, 255, 0.8),
+        0 0 40px rgba(127, 219, 255, 0.4),
+        2px 2px 0 #000;
+    font-size: clamp(24px, 7vw, 38px);
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 2px;
+    line-height: 1.4;
 }
 
 #startBtn {
-    margin-top: 20px;
-    padding: 15px 30px;
+    margin-top: 30px;
+    padding: 16px 36px;
     font-size: clamp(18px, 5vw, 24px);
     background: linear-gradient(180deg, #ff851b, #ff4136);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-    transition: transform 0.1s;
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    letter-spacing: 3px;
+    box-shadow:
+        0 4px 15px rgba(255, 65, 54, 0.5),
+        0 0 30px rgba(255, 133, 27, 0.3);
+    transition: transform 0.1s, box-shadow 0.2s;
+    text-transform: uppercase;
+    animation: btnGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes btnGlow {
+    from { box-shadow: 0 4px 15px rgba(255, 65, 54, 0.5), 0 0 30px rgba(255, 133, 27, 0.3); }
+    to { box-shadow: 0 6px 25px rgba(255, 65, 54, 0.8), 0 0 50px rgba(255, 133, 27, 0.5); }
+}
+
+#startBtn:hover {
+    transform: translateY(-3px);
 }
 
 #startBtn:active {
     transform: scale(0.95);
 }
 
+
 #musicToggleBtn {
     position: absolute;
     top: 15px;
     right: 15px;
     padding: 8px 16px;
-    font-size: clamp(14px, 3vw, 16px);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border: 2px solid #fff;
+    font-size: clamp(12px, 2.5vw, 14px);
+    background: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     cursor: pointer;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
     pointer-events: auto;
-    transition: background 0.2s, color 0.2s;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+    letter-spacing: 1px;
 }
 
 #musicToggleBtn.on {
-    background: white;
-    color: black;
+    background: rgba(127, 219, 255, 0.2);
+    color: #7fdbff;
+    border-color: #7fdbff;
+    box-shadow: 0 0 15px rgba(127, 219, 255, 0.3);
 }
