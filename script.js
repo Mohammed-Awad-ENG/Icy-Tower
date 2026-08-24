@@ -10,9 +10,7 @@ const finalFloorDisplay = document.getElementById('finalFloor');
 const finalComboDisplay = document.getElementById('finalCombo');
 const restartBtn = document.getElementById('restartBtn');
 const screenFlash = document.getElementById('screenFlash');
-const btnLeft = document.getElementById('btnLeft');
-const btnRight = document.getElementById('btnRight');
-const btnJump = document.getElementById('btnJump');
+
 const startMenu = document.getElementById('startMenu');
 const startBtn = document.getElementById('startBtn');
 const musicToggleBtn = document.getElementById('musicToggleBtn');
@@ -126,8 +124,7 @@ const TILT_THRESHOLD = 8;
 function enableTiltControls() {
     if (tiltEnabled) return;
     tiltEnabled = true;
-    
-    document.querySelector('.touch-controls').style.display = 'none';
+
 
     window.addEventListener('deviceorientation', (e) => {
         if (gameState !== 'playing') return;
@@ -167,14 +164,6 @@ function requestTilt() {
 }
 
 
-if (btnLeft) {
-    btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowLeft = true; });
-    btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys.ArrowLeft = false; });
-    btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowRight = true; });
-    btnRight.addEventListener('touchend', (e) => { e.preventDefault(); keys.ArrowRight = false; });
-    btnJump.addEventListener('touchstart', (e) => { e.preventDefault(); keys.Space = true; });
-    btnJump.addEventListener('touchend', (e) => { e.preventDefault(); keys.Space = false; });
-}
 
 
 let player = {}, platforms = [], particles = [], fxParticles = [];
@@ -255,8 +244,8 @@ function initGame() {
 
     player = {
         x: logicalWidth/2-15, y: logicalHeight-200, width: 30, height: 40,
-        dx: 0, dy: 0, speed: 0.25, maxSpeed: 8, gravity: 0.4,
-        jumpStrength: -11.5, onGround: false, wasOnGround: false,
+        dx: 0, dy: 0, speed: 0.35, maxSpeed: 8, gravity: 0.5,
+        jumpStrength: -12, onGround: false, wasOnGround: false,
         wallJumpTimer: 0, facingRight: true, scaleX: 1, scaleY: 1, animTimer: 0
     };
 
@@ -266,9 +255,10 @@ function initGame() {
     lastPlatformY = logicalHeight - 60;
     generatePlatforms();
 
-    cameraY = 0; score = 0; highestFloor = 0; gameSpeed = 1.0;
+    cameraY = 0; score = 0; highestFloor = 0; gameSpeed = 1.5;
     combo = 0; lastFloorTouched = 0; comboTimer = 0;
     shakeX = 0; shakeY = 0; shakeMag = 0;
+    lastTime = 0; accumulator = 0;
     gameState = 'playing';
     scoreDisplay.innerText = 'Score: 0';
     floorDisplay.innerText = 'Floor: 0';
@@ -280,8 +270,12 @@ function initGame() {
 
 function generatePlatforms() {
     while (lastPlatformY > cameraY - logicalHeight * 2.5) {
-        lastPlatformY -= Math.random() * 30 + 70;
-        let minW = Math.max(150, logicalWidth*0.2), maxW = Math.min(320, logicalWidth*0.4);
+        let gap = Math.random() * 30 + 70;
+        if (floorCounter > 30) gap += Math.min((floorCounter - 30) * 0.5, 25);
+        lastPlatformY -= gap;
+        let shrink = Math.min(floorCounter * 0.8, 60);
+        let minW = Math.max(100, logicalWidth*0.18 - shrink), maxW = Math.min(280 - shrink, logicalWidth*0.35);
+        if (maxW < minW) maxW = minW + 20;
         let w = Math.random()*(maxW-minW)+minW;
         let x = Math.random()*(logicalWidth-w);
         floorCounter++;
@@ -469,8 +463,8 @@ function updatePlayer() {
 
     
     if (player.y < cameraY + logicalHeight*0.35) cameraY = player.y - logicalHeight*0.35;
-    let targetSpeed = 1.0 + score*0.0015;
-    if (gameSpeed < targetSpeed) gameSpeed += 0.001;
+    let targetSpeed = 1.5 + score*0.003;
+    if (gameSpeed < targetSpeed) gameSpeed += 0.002;
     cameraY -= gameSpeed;
 
     
@@ -572,7 +566,19 @@ function cleanUpPlatforms() {
 }
 
 
-function gameLoop() {
+const TICK_RATE = 1000 / 60;
+let lastTime = 0;
+let accumulator = 0;
+
+function fixedUpdate() {
+    updatePlayer();
+    updateParticles();
+    updateFxParticles();
+    generatePlatforms();
+    cleanUpPlatforms();
+}
+
+function gameLoop(timestamp) {
     if (gameState === 'gameover') {
         finalScoreDisplay.innerText = score;
         finalFloorDisplay.innerText = highestFloor;
@@ -582,18 +588,23 @@ function gameLoop() {
         return;
     }
 
+    if (!lastTime) lastTime = timestamp;
+    let delta = timestamp - lastTime;
+    lastTime = timestamp;
+    if (delta > 100) delta = 100;
+    accumulator += delta;
+
+    while (accumulator >= TICK_RATE) {
+        fixedUpdate();
+        accumulator -= TICK_RATE;
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.scale(scale, scale);
     ctx.translate(shakeX, shakeY);
 
     drawBackground();
-    updatePlayer();
-    updateParticles();
-    updateFxParticles();
-    generatePlatforms();
-    cleanUpPlatforms();
-
     drawParticles();
     drawPlatforms();
     drawFxParticles();

@@ -308,46 +308,6 @@ canvas {
 }
 
 
-.touch-controls {
-    display: none;
-    width: 100%;
-    justify-content: space-between;
-    padding: 20px;
-    box-sizing: border-box;
-    align-items: center;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    pointer-events: none;
-}
-
-.touch-btn {
-    pointer-events: auto;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.7);
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    backdrop-filter: blur(4px);
-    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-}
-
-.touch-btn:active {
-    background: rgba(127, 219, 255, 0.25);
-    border-color: rgba(127, 219, 255, 0.6);
-    box-shadow: 0 0 20px rgba(127, 219, 255, 0.4);
-}
-
-@media (max-width: 800px), (max-height: 800px) {
-    .touch-controls { display: flex; }
-}
 
 
 #startMenu {
