@@ -16,9 +16,20 @@ const startBtn = document.getElementById('startBtn');
 const musicToggleBtn = document.getElementById('musicToggleBtn');
 
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
+
+function ensureAudioCtx() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
 
 function playTone(freq, dur, type, vol, detune) {
+    if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     const g = audioCtx.createGain();
     const o = audioCtx.createOscillator();
     o.type = type || 'square';
@@ -83,11 +94,12 @@ musicToggleBtn.addEventListener('click', () => {
 let gameState = 'start';
 
 function attemptPlayMenuMusic() {
-    audioCtx.resume();
+    ensureAudioCtx();
     if (gameState === 'start' && menuMusic.paused) menuMusic.play().catch(() => {});
 }
 document.addEventListener('click', attemptPlayMenuMusic, { once: true });
 document.addEventListener('keydown', attemptPlayMenuMusic, { once: true });
+document.addEventListener('touchstart', attemptPlayMenuMusic, { once: true });
 
 
 let bgPattern = null;
@@ -119,16 +131,35 @@ document.addEventListener('keyup', (e) => {
 });
 
 let tiltEnabled = false;
-const TILT_THRESHOLD = 8; 
+let touchEnabled = false;
+const TILT_THRESHOLD = 8;
+
+function enableTouchControls() {
+    if (touchEnabled) return;
+    touchEnabled = true;
+
+    document.addEventListener('touchstart', (e) => {
+        if (gameState !== 'playing') return;
+        if (e.target.closest('#ui button')) return;
+        e.preventDefault();
+        keys.Space = true;
+    }, { passive: false });
+
+    document.addEventListener('touchend', (e) => {
+        if (gameState !== 'playing') return;
+        if (e.target.closest('#ui button')) return;
+        e.preventDefault();
+        keys.Space = false;
+    }, { passive: false });
+}
 
 function enableTiltControls() {
     if (tiltEnabled) return;
     tiltEnabled = true;
 
-
     window.addEventListener('deviceorientation', (e) => {
         if (gameState !== 'playing') return;
-        const gamma = e.gamma || 0; 
+        const gamma = e.gamma || 0;
         if (gamma < -TILT_THRESHOLD) {
             keys.ArrowLeft = true;
             keys.ArrowRight = false;
@@ -140,20 +171,11 @@ function enableTiltControls() {
             keys.ArrowRight = false;
         }
     });
-
-    
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        keys.Space = true;
-    });
-    canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        keys.Space = false;
-    });
 }
 
+function requestMobileControls() {
+    enableTouchControls();
 
-function requestTilt() {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission().then(state => {
             if (state === 'granted') enableTiltControls();
@@ -234,8 +256,8 @@ function drawFxParticles() {
 function initGame() {
     menuMusic.pause(); menuMusic.currentTime = 0;
     if (gameMusicEnabled) gameMusic.play();
-    audioCtx.resume();
-    requestTilt();
+    ensureAudioCtx();
+    requestMobileControls();
 
     startMenu.classList.add('hidden');
     scoreDisplay.classList.remove('hidden');
